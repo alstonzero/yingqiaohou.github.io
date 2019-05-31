@@ -195,9 +195,339 @@ public class SparseGraph {
 
 ```
 
+### 通过节点遍历它的临边所对应节点
+
+1. 在邻接矩阵中：需要将这个节点的这一行全部遍历一遍，如果为0说明不相邻；如果为1说明相邻。
+2. 在邻接表中：因为这个点这一行所存储的就是相邻的节点元素，则直接输出。
+
+**实现思路： **
+
+1. 将变量g(矩阵或链表)从priavte改为public，直接进行循环。
+2. 保持g本身为private，借助迭代器实现
+
+#### 设置迭代器的意义：
+
+稠密图和稀疏图这两个实现，里面的具体实现被屏蔽了。它们呈现给外面的接口是完全一样的，这为我们后续实现图相关的算法带来了方便。我们的每一个算法既对稀疏图也对稠密图成立，因为我们调用的是同一个接口，我们的图算法都应该封装在同一个模板类中。我们就可以任意传入稀疏图或者稠密图到这个模板中。
+
+**1、邻接矩阵的迭代器方法实现:**
+
+这里的g是boolean型矩阵。
+
+```java
+// 返回图中一个顶点的所有邻边
+// 由于java使用引用机制，返回一个Vector不会带来额外开销,
+    
+public Iterable<Integer> adj(int v) {
+     //定义一个可迭代方法，求v节点的临边所对应节点
+     assert v >= 0 && v < n;
+     Vector<Integer> adjV = new Vector<Integer>(); 
+     for(int i = 0 ; i < n ; i ++ )  //遍历v节点所在的那一行
+         if( g[v][i] )               //如果为true证明有临边
+             adjV.add(i);            //将临边对应的节点存入vector
+     return adjV;                    //返回vector   
+}
+```
+
+**2、邻接链表的迭代方法实现：**
+
+这里的g是Vector类型变量，里面存储的元素就是临边所对应的节点。
+
+```java
+// 返回图中一个顶点的所有邻边
+// 由于java使用引用机制，返回一个Vector不会带来额外开销,
+public Iterable<Integer> adj(int v){
+    assert v >= 0 && v < n;
+    return g[v]; 
+}
+```
 
 
-## 图的遍历：
+
+### 图的算法框架
+
+**1、首先建立Graph的接口**
+
+```java
+// 图的接口
+public interface Graph {
+
+    public int V(); //返回节点个数
+    public int E(); //返回边的个数
+    public void addEdge( int v , int w ); // 向图中添加一个边
+    boolean hasEdge( int v , int w );    // 验证图中是否有从v到w的边
+    void show();   // 显示图的信息
+    public Iterable<Integer> adj(int v); // 返回图中一个顶点的所有邻边(所对应节点)
+}
+```
+
+**2、实现接口，创建稠密图类DenseGraph（建立邻接矩阵）和稀疏图类SparseGraph（建立邻接表）**
+
+​      **稠密图 - 邻接矩阵** 具体实现
+
+```java
+import java.util.Vector;
+
+// 稠密图 - 邻接矩阵
+public class DenseGraph implements Graph{
+
+    private int n;  // 节点数
+    private int m;  // 边数
+    private boolean directed;   // 是否为有向图
+    private boolean[][] g;      // 图的具体数据
+
+    // 构造函数
+    public DenseGraph( int n , boolean directed ){
+        assert n >= 0;
+        this.n = n;
+        this.m = 0;    // 初始化没有任何边
+        this.directed = directed;
+        // g初始化为n*n的布尔矩阵, 每一个g[i][j]均为false, 表示没有任和边
+        // false为boolean型变量的默认值
+        g = new boolean[n][n];
+    }
+
+    public int V(){ return n;} // 返回节点个数
+    public int E(){ return m;} // 返回边的个数
+
+    // 向图中添加一个边
+    public void addEdge( int v , int w ){
+
+        assert v >= 0 && v < n ;
+        assert w >= 0 && w < n ;
+
+        if( hasEdge( v , w ) )
+            return;
+
+        g[v][w] = true;
+        if( !directed )
+            g[w][v] = true;
+
+        m ++;
+    }
+
+    // 验证图中是否有从v到w的边
+    public boolean hasEdge( int v , int w ){
+        assert v >= 0 && v < n ;
+        assert w >= 0 && w < n ;
+        return g[v][w];
+    }
+
+    // 显示图的信息
+    public void show(){
+
+        for( int i = 0 ; i < n ; i ++ ){
+            for( int j = 0 ; j < n ; j ++ )
+                System.out.print(g[i][j]+"\t");
+            System.out.println();
+        }
+    }
+
+    // 返回图中一个顶点的所有邻边
+    // 由于java使用引用机制，返回一个Vector不会带来额外开销,
+    public Iterable<Integer> adj(int v) {
+        assert v >= 0 && v < n;
+        Vector<Integer> adjV = new Vector<Integer>();
+        for(int i = 0 ; i < n ; i ++ )
+            if( g[v][i] )
+                adjV.add(i);
+        return adjV;
+    }
+}
+
+
+```
+
+​        **稀疏图 - 邻接表** 具体实现
+
+```java
+// 稀疏图 - 邻接表
+import java.util.Vector;
+public class SparseGraph implements Graph {
+
+    private int n;  // 节点数
+    private int m;  // 边数
+    private boolean directed;   // 是否为有向图
+    private Vector<Integer>[] g; // 图的具体数据
+
+    // 构造函数
+    public SparseGraph( int n , boolean directed ){
+        assert n >= 0;
+        this.n = n;
+        this.m = 0;    // 初始化没有任何边
+        this.directed = directed;
+        // g初始化为n个空的vector, 表示每一个g[i]都为空, 即没有任和边
+        g = (Vector<Integer>[])new Vector[n];
+        for(int i = 0 ; i < n ; i ++)
+            g[i] = new Vector<Integer>();
+    }
+
+    public int V(){ return n;} // 返回节点个数
+    public int E(){ return m;} // 返回边的个数
+
+    // 向图中添加一个边
+    public void addEdge( int v, int w ){
+
+        assert v >= 0 && v < n ;
+        assert w >= 0 && w < n ;
+
+        g[v].add(w);
+        if( v != w && !directed )
+            g[w].add(v);
+
+        m ++;
+    }
+
+    // 验证图中是否有从v到w的边
+    public boolean hasEdge( int v , int w ){
+
+        assert v >= 0 && v < n ;
+        assert w >= 0 && w < n ;
+
+        for( int i = 0 ; i < g[v].size() ; i ++ )
+            if( g[v].elementAt(i) == w )
+                return true;
+        return false;
+    }
+
+    // 显示图的信息
+    public void show(){
+
+        for( int i = 0 ; i < n ; i ++ ){
+            System.out.print("vertex " + i + ":\t");
+            for( int j = 0 ; j < g[i].size() ; j ++ )
+                System.out.print(g[i].elementAt(j) + "\t");
+            System.out.println();
+        }
+    }
+
+    // 返回图中一个顶点的所有邻边
+    // 由于java使用引用机制，返回一个Vector不会带来额外开销,
+    public Iterable<Integer> adj(int v) {
+        assert v >= 0 && v < n;
+        return g[v];
+    }
+}
+```
+
+**3、创建类ReadGraph:**读取图的信息，并将此算法封装在类中。而且无论是对于稀疏图还是稠密图都可以在这个算法上运行。
+
+#### ReadGraph实现关键：
+
+1. 创建读取文件的方法readFile()，根据文件内容在节点之间添加边。
+2. 构造函数的传入类型定义为Graph（向上转型）使得既能传入稀疏图也能传入稠密图。而在调用addEdge（）方法添加边时，则调用的是各自子类的方法。
+
+```java
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Scanner;
+import java.util.Locale;
+import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
+
+public class ReadGraph {
+
+    private Scanner scanner;
+
+    public ReadGraph(Graph graph, String filename){//
+   //定义类型为Graph(向上转型)，使得在这个模板中既可以传入稀疏图又可以传入稠密图。
+        readFile(filename);  //读取文件
+
+        try {
+            int V = scanner.nextInt(); //读取文本文件第一行第一个元素（代表节点个数）
+            if (V < 0)
+                throw new IllegalArgumentException("number of vertices in a Graph must be nonnegative");
+            assert V == graph.V();  //判断读取文件的节点数和图中的节点数是一致的
+
+            int E = scanner.nextInt(); //读取文本文件第一行第二个元素（代表临边个数）
+            if (E < 0) 
+                throw new IllegalArgumentException("number of edges in a Graph must be nonnegative");
+
+            for (int i = 0; i < E; i++) { 
+                int v = scanner.nextInt(); //读取第二行第一个元素(代表节点)
+                int w = scanner.nextInt(); //读取第二行第二个元素(代表节点)
+                assert v >= 0 && v < V;
+                assert w >= 0 && w < V;
+            //在这两个节点之间加一条临边,调用的是传进来的graph所对应子类的addEdge方法。     
+                graph.addEdge(v, w); 
+            }
+        }
+        catch (InputMismatchException e) {
+            String token = scanner.next();
+            throw new InputMismatchException("attempts to read an 'int' value from input stream, but the next token is \"" + token + "\"");
+        }
+        catch (NoSuchElementException e) {
+            throw new NoSuchElementException("attemps to read an 'int' value from input stream, but there are no more tokens available");
+        }
+    }
+
+    private void readFile(String filename){ //定义读取文件的方法
+        assert filename != null;
+        try {
+            File file = new File(filename);
+            if (file.exists()) { //如果该文件存在
+                FileInputStream fis = new FileInputStream(file);
+                scanner = new Scanner(new BufferedInputStream(fis), "UTF-8");
+                scanner.useLocale(Locale.ENGLISH);
+            }
+            else
+                throw new IllegalArgumentException(filename + "doesn't exist.");
+        }
+        catch (IOException ioe) { //无法打开该文件
+            throw new IllegalArgumentException("Could not open " + filename, ioe);
+        }
+    }
+}
+```
+
+4、测试通过文件读取图的信息
+
+```java
+// 测试通过文件读取图的信息
+public class Main {
+
+    public static void main(String[] args) {
+
+        // 使用两种图的存储方式读取testG1.txt文件
+        String filename = "testG1.txt";
+        SparseGraph g1 = new SparseGraph(13, false);  //g1有13个节点，无向图
+        ReadGraph readGraph1 = new ReadGraph(g1, filename);
+        System.out.println("test G1 in Sparse Graph:");
+        g1.show();
+
+        System.out.println();
+
+        DenseGraph g2 = new DenseGraph(13, false);
+        ReadGraph readGraph2 = new ReadGraph(g2 , filename );
+        System.out.println("test G1 in Dense Graph:");
+        g2.show();
+
+        System.out.println();
+
+        // 使用两种图的存储方式读取testG2.txt文件
+        filename = "testG2.txt";
+        SparseGraph g3 = new SparseGraph(6, false);
+        ReadGraph readGraph3 = new ReadGraph(g3, filename);
+        System.out.println("test G2 in Sparse Graph:");
+        g3.show();
+
+        System.out.println();
+
+        DenseGraph g4 = new DenseGraph(6, false);
+        ReadGraph readGraph4 = new ReadGraph(g4, filename);
+        System.out.println("test G2 in Dense Graph:");
+        g4.show();
+    }
+}
+
+```
+
+
+
+
+
+# 图的遍历： 
 
 图的遍历就是要找出图中所有的点，一般有以下两种方法：
 
