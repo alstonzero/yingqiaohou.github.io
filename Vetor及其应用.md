@@ -155,12 +155,12 @@ public class VectorApp
           System.out.println("The Vector v1 is:\n\t"+v1); 
          
          //向指定位置插入新对象 
+         //指定位置后的对象依次往后顺延 
           v1.insertElement("three",2); 
           v1.insertElement(new Float(3.9),3); 
           System.out.println("The Vector v1(used method insertElementAt()is:\n\t)"+v1); 
           
           //将指定位置的对象设置为新的对象 
-          //指定位置后的对象依次往后顺延 
            v1.setElementAt("four",2); 
            System.out.println("The vector v1 cused method setElmentAt()is:\n\t"+v1); 
            
@@ -177,7 +177,7 @@ public class VectorApp
            System.out.println(); 
             
             
-         //按不同的方向查找对象integer1所处的位置
+          //按不同的方向查找对象integer1所处的位置
             System.out.println("The position of Object1(top-to-botton):"+v1.indexOf(integer1)); 
             System.out.println("The position of Object1(tottom-to-top):"+v1.lastIndexOf(integer1)); 
              
