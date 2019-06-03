@@ -409,12 +409,12 @@ public class SparseGraph implements Graph {
 }
 ```
 
-**3、创建类ReadGraph:** 读取图的信息，并将此算法封装在类中。而且无论是对于稀疏图还是稠密图都可以在这个算法上运行。
+**3、创建类ReadGraph:**  读取图的信息，并将此算法封装在类中。而且无论是对于稀疏图还是稠密图都可以在这个算法上运行。
 
 #### ReadGraph实现关键：
 
-1. 创建读取文件的方法readFile()，根据文件内容在节点之间添加边。
-2. 构造函数的传入类型定义为Graph（向上转型）使得既能传入稀疏图也能传入稠密图。而在调用addEdge（）方法添加边时，则调用的是各自子类的方法。
+1. 创建读取文件的方法readFile()，并根据文件内容在节点之间添加边。
+2. 因为构造函数的传入类型定义为Graph（向上转型）使得既能传入稀疏图也能传入稠密图，所以在调用addEdge（）方法添加边时，则调用的是各自子类的方法。
 
 ```java
 import java.io.BufferedInputStream;
@@ -529,9 +529,14 @@ public class Main {
 
 # 图的遍历： 
 
+**相当于在漆黑的夜里，你只能看清你站的位置和你前面的路，但你不知道每条路能够通向哪里。**搜索的任务就是，给出初始位置和目标位置，要求找到一条到达目标的路径。 
+
 图的遍历就是要找出图中所有的点，一般有以下两种方法：
 
-**1. 深度优先遍历：(Depth First Search, DFS)**
+- 深度优先就是，从初始点出发，不断向前走，如果碰到死路了，就往回走一步，尝试另一条路，直到发现了目标位置。这种不撞南墙不回头的方法，即使成功也不一定找到一条好路，但好处是需要记住的位置比较少。
+- 广度优先就是，从初始点出发，把所有可能的路径都走一遍，如果里面没有目标位置，则尝试把所有两步能够到的位置都走一遍，看有没有目标位置；如果还不行，则尝试所有三步可以到的位置。这种方法，一定可以找到一条最短路径，但需要记忆的内容实在很多，要量力而行。
+
+### 1. 深度优先遍历：(Depth First Search, DFS)
 
 基本思路：深度优先遍历图的方法是，从图中某顶点 v 出发
 
@@ -544,37 +549,355 @@ public class Main {
 ```java
 //伪码实现，类似于树的先序遍历
 public void DFS(Vertex v){
-    visited[v] = true;
+    visited[v] = true;   //遍历此节点
     for(v 的每个邻接点 W){
-	if(!visited[W]){
-	    DFS(W);
-	}
+        if(!visited[W]){ //如果没有遍历这个节点。
+	    DFS(W);          //则递归去遍历它
+	    }
     }
 }
 ```
 
-\ 2. 广度优先搜索：(Breadth First Search, BFS)
+#### 连通分量
 
-广度优先搜索，可以被形象地描述为 "浅尝辄止"，它也需要一个队列以保持遍历过的顶点顺序，以便按出队的顺序再去访问这些顶点的邻接顶点。 
+无向图G的极大连通子图称为G的最强连通分量(Connected Component)。
+  注意：
+　　① 任何连通图的连通分量只有一个，即是其自身
+    　② 非连通的无向图有多个连通分量。
+【例】下图中的G4是非连通图，它有两个连通分量H1和H2。
 
-实现思路：
+![](<https://img-blog.csdn.net/20170505161156256>)
+
+**求无权图的联通分量**
+
+```java
+// 求无权图的联通分量
+public class Components {
+
+    Graph G;                    // 图的引用
+    private boolean[] visited;  // 记录dfs的过程中节点是否被访问
+    private int ccount;         // 记录联通分量个数
+    private int[] id;           // 每个节点所对应的联通分量标记
+
+    // 图的深度优先遍历
+    void dfs( int v ){
+
+        visited[v] = true; //遍历此节点
+        id[v] = ccount;    
+
+        for( int i: G.adj(v) ){//循环和adj()函数遍历图中v这个节点所有相连节点
+            if( !visited[i] )
+                dfs(i);
+        }
+    }
+
+    // 构造函数, 求出无权图的联通分量。
+    public Components(Graph graph){
+
+        // 算法初始化
+        G = graph;
+        visited = new boolean[G.V()]; //根据图中节点数量给visited开空间
+        id = new int[G.V()]; 
+        ccount = 0;
+        for( int i = 0 ; i < G.V() ; i ++ ){ //通过循环初始化visited，将每个元素都设为false
+            visited[i] = false;
+            id[i] = -1;
+        }
+
+        // 求图的联通分量
+        for( int i = 0 ; i < G.V() ; i ++ ) //
+            if( !visited[i] ){ //如果该节点没有被访问过(visited[i]为false)
+                dfs(i);        //dfs()它可以将i和与i相连接的所有节点遍历一遍，没遍历的节点一定在另外的一个联通分量中
+                ccount ++;
+            }
+    }
+
+    // 返回图的联通分量个数
+    int count(){
+        return ccount;
+    }
+
+    // 查询点v和点w是否联通
+    boolean isConnected( int v , int w ){
+        assert v >= 0 && v < G.V();
+        assert w >= 0 && w < G.V();
+        return id[v] == id[w];
+    }
+}
+```
+
+#### 深度优先搜索寻路
+
+```java
+import java.util.Vector;
+import java.util.Stack;
+
+public class Path {
+
+    private Graph G;   // 图的引用
+    private int s;     // 起始点
+    private boolean[] visited;  // 记录dfs的过程中节点是否被访问
+    private int[] from;         // 记录路径, from[i]表示查找的路径上i的上一个节点
+
+    // 图的深度优先遍历
+    private void dfs( int v ){
+        visited[v] = true;
+        for( int i : G.adj(v) )
+            if( !visited[i] ){
+                from[i] = v;
+                dfs(i);
+            }
+    }
+
+    // 构造函数, 寻路算法, 寻找图graph从s点到其他点的路径
+    public Path(Graph graph, int s){
+
+        // 算法初始化
+        G = graph;
+        assert s >= 0 && s < G.V();
+
+        visited = new boolean[G.V()];
+        from = new int[G.V()];
+        for( int i = 0 ; i < G.V() ; i ++ ){ //初始默认都没有被遍历，前一个节点为-1
+            visited[i] = false;
+            from[i] = -1;
+        }
+        this.s = s;
+
+        // 寻路算法
+        dfs(s);
+    }
+
+    // 查询从s点到w点是否有路径
+    boolean hasPath(int w){
+        assert w >= 0 && w < G.V();
+        return visited[w];     //如果w被遍历了，证明s和w之间有路径（同一个连通分量）
+    }
+
+    // 查询从s点到w点的路径, 存放在vec中
+    Vector<Integer> path(int w){
+
+        assert hasPath(w) ;
+
+        Stack<Integer> s = new Stack<Integer>();
+        // 通过from数组逆向查找到从s到w的路径, 存放到栈中
+        int p = w;
+        while( p != -1 ){
+            s.push(p);
+            p = from[p];
+        }
+
+        // 从栈中依次取出元素, 获得顺序的从s到w的路径
+        Vector<Integer> res = new Vector<Integer>();
+        while( !s.empty() )
+            res.add( s.pop() );
+
+        return res;
+    }
+
+    // 打印出从s点到w点的路径
+    void showPath(int w){
+
+        assert hasPath(w) ;
+
+        Vector<Integer> vec = path(w);
+        for( int i = 0 ; i < vec.size() ; i ++ ){
+            System.out.print(vec.elementAt(i));
+            if( i == vec.size() - 1 )
+                System.out.println();
+            else
+                System.out.print(" -> ");
+        }
+    }
+}
+```
+
+测试寻路算法
+
+```java
+public class Main {
+
+    // 测试寻路算法
+    public static void main(String[] args) {
+
+        String filename = "testG.txt";
+        SparseGraph g = new SparseGraph(7, false);
+        ReadGraph readGraph = new ReadGraph(g, filename);
+        g.show();
+        System.out.println();
+
+        Path path = new Path(g,0);
+        System.out.println("Path from 0 to 6 : ");
+        path.showPath(6);
+    }
+}
+```
+
+###  2. 广度优先搜索：(Breadth First Search, BFS)--无权图最短路径
+
+广度优先搜索，可以被形象地描述为 "浅尝辄止"，它也需要借助一个**队列**以保持遍历过的顶点顺序，以便按出队的顺序再去访问这些顶点的邻接顶点。 
+
+**实现思路：**
 
 1. 顶点 v 入队列
 2. 当队列非空时则继续执行，否则算法结束
 3. 出队列取得队头顶点 v；访问顶点 v 并标记顶点 v 已被访问
-4. 查找顶点 v 的第一个邻接顶点 col
-5. 若 v 的邻接顶点 col 未被访问过的，则 col 继续
-6. 查找顶点 v 的另一个新的邻接顶点 col，转到步骤 5 入队列，直到顶点 v 的所有未被访问过的邻接点处理完。转到步骤 2
+4. 查找顶点 v 的第一个邻接顶点 i
+5. 若 v 的邻接顶点 i 未被访问过的，则把节点 i 加入队列，标记节点 i 已被访问， 记录路径，即把v存进from[i]表示查找的路径上i的上一个节点，次序加一。
+6. 查找顶点v 的另一个新的邻接顶点 i`，转到步骤 5 入队列，直到顶点 v 的所有未被访问过的邻接点处理完。转到步骤 2
 
 要理解深度优先和广度优先搜索，首先要理解搜索步，一个完整的搜索步包括两个处理 
 
 1. 获得当前位置上，有几条路可供选择
 2. 根据选择策略，选择其中一条路，并走到下个位置
 
-**相当于在漆黑的夜里，你只能看清你站的位置和你前面的路，但你不知道每条路能够通向哪里。**搜索的任务就是，给出初始位置和目标位置，要求找到一条到达目标的路径。 
 
-- 深度优先就是，从初始点出发，不断向前走，如果碰到死路了，就往回走一步，尝试另一条路，直到发现了目标位置。这种不撞南墙不回头的方法，即使成功也不一定找到一条好路，但好处是需要记住的位置比较少。
-- 广度优先就是，从初始点出发，把所有可能的路径都走一遍，如果里面没有目标位置，则尝试把所有两步能够到的位置都走一遍，看有没有目标位置；如果还不行，则尝试所有三步可以到的位置。这种方法，一定可以找到一条最短路径，但需要记忆的内容实在很多，要量力而行。
+
+```java
+import java.util.Vector;
+import java.util.Stack;
+import java.util.LinkedList;
+import java.util.Queue;
+
+public class ShortestPath {
+
+    private Graph G;   // 图的引用
+    private int s;     // 起始点
+    private boolean[] visited;  // 记录dfs的过程中节点是否被访问
+    private int[] from;         // 记录路径, from[i]表示查找的路径上i的上一个节点
+    private int[] ord;          // 记录路径中节点的次序。ord[i]表示i节点在路径中的次序。
+
+
+    // 构造函数, 寻路算法, 寻找图graph从s点到其他点的路径
+    public ShortestPath(Graph graph, int s){
+
+        // 算法初始化
+        G = graph;
+        assert s >= 0 && s < G.V();
+
+        visited = new boolean[G.V()];  //是否已经遍历
+        from = new int[G.V()];
+        ord = new int[G.V()];
+        for( int i = 0 ; i < G.V() ; i ++ ){
+            visited[i] = false;
+            from[i] = -1;
+            ord[i] = -1;
+        }
+        this.s = s;
+
+        // 无向图最短路径算法, 从s开始广度优先遍历整张图
+        Queue<Integer> q = new LinkedList<Integer>();
+
+        q.add(s);               //把点s加入队列
+        visited[s] = true;      //点s已经遍历
+        ord[s] = 0;             //记录点s遍历的顺序
+        while( !q.isEmpty() ){  //如果队列不为空
+            int v = q.remove(); //把点s移除队列记录为v
+            for( int i : G.adj(v) ) //通过循环和adj函数遍历与v相邻的节点i
+                if( !visited[i] ){  //如果i没有被遍历
+                    q.add(i);       //就把i加进队列
+                    visited[i] = true; //遍历节点i
+                    from[i] = v;    //把v存进from[i]表示查找的路径上i的上一个节点
+                    ord[i] = ord[v] + 1;  //次序加一
+                }
+        }
+    }
+
+    // 查询从s点到w点是否有路径
+    public boolean hasPath(int w){
+        assert w >= 0 && w < G.V(); 
+        return visited[w];
+    }
+
+    // 查询从s点到w点的路径, 存放在vec中
+    public Vector<Integer> path(int w){
+
+        assert hasPath(w) ;
+
+        Stack<Integer> s = new Stack<Integer>();
+        // 通过from数组逆向查找到从s到w的路径, 存放到栈中
+        int p = w;
+        while( p != -1 ){
+            s.push(p);
+            p = from[p];
+        }
+
+        // 从栈中依次取出元素, 获得顺序的从s到w的路径
+        Vector<Integer> res = new Vector<Integer>();
+        while( !s.empty() )
+            res.add( s.pop() );
+
+        return res;
+    }
+
+    // 打印出从s点到w点的路径
+    public void showPath(int w){
+
+        assert hasPath(w) ;
+
+        Vector<Integer> vec = path(w);
+        for( int i = 0 ; i < vec.size() ; i ++ ){
+            System.out.print(vec.elementAt(i));
+            if( i == vec.size() - 1 )
+                System.out.println();
+            else
+                System.out.print(" -> ");
+        }
+    }
+
+    // 查看从s点到w点的最短路径长度
+    // 若从s到w不可达，返回-1
+    public int length(int w){
+        assert w >= 0 && w < G.V();
+        return ord[w];
+    }
+}
+```
+
+**测试无权图最短路径算法**
+
+```java
+public class Main {
+
+    // 测试无权图最短路径算法
+    public static void main(String[] args) {
+
+        String filename = "testG.txt";
+        SparseGraph g = new SparseGraph(7, false);
+        ReadGraph readGraph = new ReadGraph(g, filename);
+        g.show();
+
+        // 比较使用深度优先遍历和广度优先遍历获得路径的不同
+        // 广度优先遍历获得的是无权图的最短路径
+        Path dfs = new Path(g,0);
+        System.out.print("DFS : ");
+        dfs.showPath(6);
+
+        ShortestPath bfs = new ShortestPath(g,0);
+        System.out.print("BFS : ");
+        bfs.showPath(6);
+
+        System.out.println();
+
+        filename = "testG1.txt";
+        SparseGraph g2 = new SparseGraph(13, false);
+        ReadGraph readGraph2 = new ReadGraph(g2, filename);
+        g2.show();
+
+        // 比较使用深度优先遍历和广度优先遍历获得路径的不同
+        // 广度优先遍历获得的是无权图的最短路径
+        Path dfs2 = new Path(g2,0);
+        System.out.print("DFS : ");
+        dfs2.showPath(3);
+
+        ShortestPath bfs2 = new ShortestPath(g,0);
+        System.out.print("BFS : ");
+        bfs.showPath(3);
+    }
+}
+```
+
+
 
 ## 最短路径算法 (Shortest Path Algorithm)
 
