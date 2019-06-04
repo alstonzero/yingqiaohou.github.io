@@ -733,6 +733,19 @@ public class Main {
     }
 }
 ```
+结果表示
+```
+vertex 0:	1	2	5	6	
+vertex 1:	0	
+vertex 2:	0	
+vertex 3:	4	5	
+vertex 4:	3	5	6	
+vertex 5:	0	3	4	
+vertex 6:	0	4	
+
+Path from 0 to 6 : 
+0 -> 5 -> 3 -> 4 -> 6
+```
 
 ###  2. 广度优先搜索：(Breadth First Search, BFS)--无权图最短路径
 
