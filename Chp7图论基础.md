@@ -958,7 +958,36 @@ public class ShortestPath {
 ```
 
 **测试无权图最短路径算法**
+导入文件
+```
+//testG.txt
+7 8   //7个节点8个临边
+0 1   //0和1之间有一条临边
+0 2
+0 5
+0 6
+3 4
+3 5
+4 5
+4 6
 
+//testG1.txt
+13 13 //13个节点和13条临边
+0 5   //0和5之间有一条临边
+4 3
+0 1
+9 12
+6 4
+5 4
+0 2
+11 12
+9 10
+0 6
+7 8
+9 11
+5 3
+```
+开始测试
 ```java
 public class Main {
 
@@ -999,8 +1028,34 @@ public class Main {
     }
 }
 ```
+输出结果
+```
+vertex 0:	1	2	5	6	
+vertex 1:	0	
+vertex 2:	0	
+vertex 3:	4	5	
+vertex 4:	3	5	6	
+vertex 5:	0	3	4	
+vertex 6:	0	4	
+DFS : 0 -> 5 -> 3 -> 4 -> 6
+BFS : 0 -> 6
 
-
+vertex 0:	5	1	2	6	
+vertex 1:	0	
+vertex 2:	0	
+vertex 3:	4	5	
+vertex 4:	3	6	5	
+vertex 5:	0	4	3	
+vertex 6:	4	0	
+vertex 7:	8	
+vertex 8:	7	
+vertex 9:	12	10	11	
+vertex 10:	9	
+vertex 11:	12	9	
+vertex 12:	9	11	
+DFS : 0 -> 5 -> 4 -> 3
+BFS : 0 -> 5 -> 3
+```
 
 ## 最短路径算法 (Shortest Path Algorithm)
 
