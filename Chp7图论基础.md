@@ -654,16 +654,17 @@ public class Path {
 
         // 算法初始化
         G = graph;
-        assert s >= 0 && s < G.V();
+        assert s >= 0 && s < G.V();    //先判断s是否越界
 
-        visited = new boolean[G.V()];
-        from = new int[G.V()];
-        for( int i = 0 ; i < G.V() ; i ++ ){ //初始默认都没有被遍历，前一个节点为-1
+        visited = new boolean[G.V()];  //visited的长度定义为图G中节点个数
+        from = new int[G.V()];         //from长度也定义为图G中节点个数
+        for( int i = 0 ; i < G.V() ; i ++ ){ //初始默认所有节点都没有被遍历，前一个节点为-1
             visited[i] = false;
             from[i] = -1;
         }
-        this.s = s;
-
+        
+	this.s = s;                    
+	
         // 寻路算法
         dfs(s);
     }
@@ -682,14 +683,14 @@ public class Path {
         Stack<Integer> s = new Stack<Integer>();
         // 通过from数组逆向查找到从s到w的路径, 存放到栈中
         int p = w;
-        while( p != -1 ){
-            s.push(p);
-            p = from[p];
+        while( p != -1 ){    //不是起始节点。因为当起始节点压入栈后，它的前一个节点是-1，退出循环
+            s.push(p);       //将当前节点压入栈中
+            p = from[p];     //指向当前节点的前一个节点
         }
 
         // 从栈中依次取出元素, 获得顺序的从s到w的路径
         Vector<Integer> res = new Vector<Integer>();
-        while( !s.empty() )
+        while( !s.empty() )   //只要栈不为空，则出栈
             res.add( s.pop() );
 
         return res;
@@ -698,14 +699,14 @@ public class Path {
     // 打印出从s点到w点的路径
     void showPath(int w){
 
-        assert hasPath(w) ;
+        assert hasPath(w) ;        
 
-        Vector<Integer> vec = path(w);
-        for( int i = 0 ; i < vec.size() ; i ++ ){
+        Vector<Integer> vec = path(w);  
+        for( int i = 0 ; i < vec.size() ; i ++ ){ //
             System.out.print(vec.elementAt(i));
-            if( i == vec.size() - 1 )
+            if( i == vec.size() - 1 )  //遍历到了最后一个节点
                 System.out.println();
-            else
+            else                       
                 System.out.print(" -> ");
         }
     }
