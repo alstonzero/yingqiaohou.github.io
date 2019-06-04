@@ -483,6 +483,36 @@ public class ReadGraph {
 
 4、测试通过文件读取图的信息
 
+传入testG1.txt
+```
+testG1.txt
+13 13
+0 5
+4 3
+0 1
+9 12
+6 4
+5 4
+0 2
+11 12
+9 10
+0 6
+7 8
+9 11
+5 3
+
+testG2.txt
+6 8
+0 1
+0 2
+0 5
+1 2
+1 3
+1 4
+3 4
+3 5
+```
+
 ```java
 // 测试通过文件读取图的信息
 public class Main {
@@ -522,7 +552,54 @@ public class Main {
 }
 
 ```
+输出结果
+```
+test G1 in Sparse Graph:
+vertex 0:	5	1	2	6	
+vertex 1:	0	
+vertex 2:	0	
+vertex 3:	4	5	
+vertex 4:	3	6	5	
+vertex 5:	0	4	3	
+vertex 6:	4	0	
+vertex 7:	8	
+vertex 8:	7	
+vertex 9:	12	10	11	
+vertex 10:	9	
+vertex 11:	12	9	
+vertex 12:	9	11	
 
+test G1 in Dense Graph:
+false	true	true	false	false	true	true	false	false	false	false	false	false	
+true	false	false	false	false	false	false	false	false	false	false	false	false	
+true	false	false	false	false	false	false	false	false	false	false	false	false	
+false	false	false	false	true	true	false	false	false	false	false	false	false	
+false	false	false	true	false	true	true	false	false	false	false	false	false	
+true	false	false	true	true	false	false	false	false	false	false	false	false	
+true	false	false	false	true	false	false	false	false	false	false	false	false	
+false	false	false	false	false	false	false	false	true	false	false	false	false	
+false	false	false	false	false	false	false	true	false	false	false	false	false	
+false	false	false	false	false	false	false	false	false	false	true	true	true	
+false	false	false	false	false	false	false	false	false	true	false	false	false	
+false	false	false	false	false	false	false	false	false	true	false	false	true	
+false	false	false	false	false	false	false	false	false	true	false	true	false	
+
+test G2 in Sparse Graph:
+vertex 0:	1	2	5	
+vertex 1:	0	2	3	4	
+vertex 2:	0	1	
+vertex 3:	1	4	5	
+vertex 4:	1	3	
+vertex 5:	0	3	
+
+test G2 in Dense Graph:
+false	true	true	false	false	true	
+true	false	true	true	true	false	
+true	true	false	false	false	false	
+false	true	false	false	true	true	
+false	true	false	true	false	false	
+true	false	false	true	false	false
+```
 
 
 
