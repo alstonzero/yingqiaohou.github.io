@@ -260,3 +260,148 @@ public class LinkedList<E> {
 
 ```
 
+### 四、链表遍历，查询和修改
+
+```java
+ // 获得链表的第index(0-based)个位置的元素
+    // 在链表中不是一个常用的操作，练习用：）
+    public E get(int index){
+
+        if(index < 0 || index >= size)
+            throw new IllegalArgumentException("Get failed. Illegal index.");
+
+        Node cur = dummyHead.next;
+        for(int i = 0 ; i < index ; i ++)
+            cur = cur.next;
+        return cur.e;
+    }
+
+    // 获得链表的第一个元素
+    public E getFirst(){
+        return get(0);
+    }
+
+    // 获得链表的最后一个元素
+    public E getLast(){
+        return get(size - 1);
+    }
+
+    // 修改链表的第index(0-based)个位置的元素为e
+    // 在链表中不是一个常用的操作，练习用：）
+    public void set(int index, E e){
+        if(index < 0 || index >= size)
+            throw new IllegalArgumentException("Set failed. Illegal index.");
+
+        Node cur = dummyHead.next;
+        for(int i = 0 ; i < index ; i ++)
+            cur = cur.next;
+        cur.e = e;
+    }
+
+    // 查找链表中是否有元素e
+    public boolean contains(E e){
+        Node cur = dummyHead.next;
+        while(cur != null){
+            if(cur.e.equals(e))
+                return true;
+            cur = cur.next;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString(){
+        StringBuilder res = new StringBuilder();
+
+//        Node cur = dummyHead.next;
+//        while(cur != null){
+//            res.append(cur + "->");
+//            cur = cur.next;
+//        }
+        for(Node cur = dummyHead.next ; cur != null ; cur = cur.next)
+            res.append(cur + "->");
+        res.append("NULL");
+
+        return res.toString();
+    }
+}
+```
+
+测试
+
+```java
+public class Main {
+
+    public static void main(String[] args) {
+
+        LinkedList<Integer> linkedList = new LinkedList<>();
+        for(int i = 0 ; i < 5 ; i ++){
+            linkedList.addFirst(i);
+            System.out.println(linkedList);
+        }
+
+        linkedList.add(2, 666);
+        System.out.println(linkedList);
+    }
+}
+
+```
+
+### 五、删除元素
+
+删除元素和添加元素基本类似，都是定位之前一个删除元素之前的元素
+**修改元素指向才是改变链表的本质（修改元素并不能改变链表）**
+
+![](<https://img.mukewang.com/5b4a892b00017cbf13060595.png>)
+
+```java
+public E remove(int index){
+        if(index < 0 || index >= size)
+            throw new IllegalArgumentException("Remove failed. Index is illegal.");
+
+        Node prev = dummyHead;
+        for(int i = 0 ; i < index ; i ++)
+            prev = prev.next;
+
+        Node retNode = prev.next;
+        prev.next = retNode.next;
+        retNode.next = null;
+        size --;
+
+        return retNode.e;
+    }
+
+    // 从链表中删除第一个元素, 返回删除的元素
+    public E removeFirst(){
+        return remove(0);
+    }
+
+    // 从链表中删除最后一个元素, 返回删除的元素
+    public E removeLast(){
+        return remove(size - 1);
+    }
+
+    // 从链表中删除元素e
+    public void removeElement(E e){
+
+        Node prev = dummyHead;
+        while(prev.next != null){
+            if(prev.next.e.equals(e))
+                break;
+            prev = prev.next;
+        }
+
+        if(prev.next != null){
+            Node delNode = prev.next;
+            prev.next = delNode.next;
+            delNode.next = null;
+            size --;
+        }
+    }
+
+```
+
+### 六、链表中的方法和对应的时间复杂度
+
+![](<https://img.mukewang.com/5b4a8e7b0001bf9e13561349.png>)
+
