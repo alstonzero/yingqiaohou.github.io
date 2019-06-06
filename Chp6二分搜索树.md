@@ -117,7 +117,7 @@ public class BST<Key extends Comparable<Key>,Value> {		//E 要满足Comparable�
             count ++;
         }
         else
-            add(root, key ,value);	//从根节点添加新元素e
+            insert(root, key ,value);	//从根节点添加新元素e
     }
 
     // 向以node为根的二分搜索树中插入元素e，递归算法
@@ -149,7 +149,7 @@ public class BST<Key extends Comparable<Key>,Value> {		//E 要满足Comparable�
 ```java
 // 向以node为根的二分搜索树中插入元素e，递归算法
 // 返回插入新节点后二分搜索树的根 
-private Node add(Node node,Key key,Value value){
+private Node insert(Node node,Key key,Value value){
     if(node == null){	//只要node 为null,则必须新插入节点
         count ++;
         return new Node(key,value); //将节点与二叉树挂接起来
