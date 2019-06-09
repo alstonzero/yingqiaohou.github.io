@@ -229,6 +229,105 @@ public class MaxHeap<Item extends Comparable> {
 }
 ```
 
+Python代码--最大堆的实现
+
+```python
+import random
+#创建Array类固定长度的数组
+#一个下划线开头的实例变量名，比如_name，这样的实例变量外部是可以访问的，
+#但是，按照约定俗成的规定，当你看到这样的变量时，意思就是，
+# “虽然我可以被访问，但是，请把我视为私有变量，不要随意访问”。
+
+class Array(object):
+    def __init__(self,size=32): #默认长度32
+        self._size = size      #_size可以被外部访问但是要视为私有变量
+        self._items = [None]*size #用*号创建长度为size，元素全为None的列表
+
+    def __getitem__(self,index): #模式方法。实现通过[]进行访问
+        return self._items[index]
+
+    def __setitem__(self, index, value): #设置相应位置的元素
+        self._items[index] = value
+
+    def __len__(self):  #返回长度值
+        return self._size
+
+    def clear(self,value=None):
+        for i in range(self._items):
+            self._items[i]=value
+
+
+
+    def __iter__(self): #遍历数组
+        for item in self._items:
+            yield item
+            
+class MaxHeap(object):
+    def __init__(self,capacity=None):
+
+        self.capacity = capacity+1 #堆的容量
+        self._data = Array(self.capacity) #创建内部数组，用来实现最大堆
+        self._count = 0  #堆中元素个数
+
+    def __len__(self):  #最大堆的长度
+        return self._count
+
+    def add(self,item): #向堆中添加元素
+        if self._count>=self.capacity:
+            raise Exception('full')
+
+        self._count += 1
+        self._data[self._count] = item
+        self.__shiftUp(self._count)
+
+    def size(self):
+        return self.count
+
+    def isEmpty(self):
+        return self.count ==0
+
+    def extractMax(self):
+        if self._count <=0:
+            raise Exception("empty")
+        ret = self._data[1] #存储顶点元素
+        self._data[1],self._data[self._count] = self._data[self._count],self._data[1]
+        self._count-=1
+        self.__shiftDown(1)
+        return ret
+
+    def __shiftUp(self,k):  #
+        # 指针k对应节点不是root节点且子节点大于父节点
+        while(k>1 and self._data[k]>self._data[k//2]):
+            self._data[k//2],self._data[k]=self._data[k],self._data[k//2]
+            k //=2
+
+    def __shiftDown(self,k):
+        while(2*k<=self._count): #该节点有左孩子（证明肯定有孩子）
+            j = k*2
+            #如果该节点有右孩子且右孩子更大时，指针指向右孩子
+            if(j+1<=self._count and self._data[j+1]>self._data[j]):
+                j+=1
+            if(self._data[k]>=self._data[j]):
+                break
+            self._data[k],self._data[j]=self._data[j],self._data[k]
+            k=j
+            
+def test_MaxHeap():
+    arr = list(range(33))
+    random.shuffle(arr)
+    print(arr)
+    heap = MaxHeap(len(arr))
+    res = []
+    for i in range(len(arr)): #将随机生成的arr元素入堆
+        heap.add(arr[i])
+    for i in range(len(arr)): #堆中元素出堆
+        res.append(heap.extractMax())
+    print(res) #从大到小
+    for i in range(len(arr) // 2): #反转数组
+        res[i], res[len(res) - 1 - i] = res[len(res) - 1 - i], res[i]
+    print(res)
+```
+
 
 
 
