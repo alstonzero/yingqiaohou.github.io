@@ -180,26 +180,27 @@ public class MaxHeap<Item extends Comparable> {
 	}
 	
 	//重要辅助函数
-	private void shiftUp(int k) {
-		//当前节点k大于母节点k/2，则元素交换。k变成k/2
-		while(k>1 && data[k/2].compareTo(data[k])<0) {
-			swap(k/2,k);
-			k = k/2;
+	private void shiftUp(int idx) {
+		//当前节点不是root节点且当前节点idx大于母节点idx/2。
+		while(idx>1 && data[idx/2].compareTo(data[idx])<0) {
+		//则元素交换。idx变成idx/2
+		        swap(idx/2,k);
+			idx = idx/2;
 		}
 	}
 	
-	private void shiftDown(int k) {
-		while(2*k <= count) {//保证k是有孩子的。k只要有左孩子，证明一点有孩子
-			int j = 2*k; //j是k的左孩子
+	private void shiftDown(int idx) {
+		while(2*idx <= count) {//保证节点idx是有孩子的。idx只要有左孩子，证明一点有孩子
+			int j = 2*idx; //j是k的左孩子
 			
-			if(j+1<= count && data[j+1].compareTo(data[j])>0)
-				j++; //j是k的右孩子
-			//保证data[j]是data[2*k]和data[2*k+1]中的最大值
+			if(j+1<= count && data[idx+1].compareTo(data[j])>0)
+				j++; //j是idx的右孩子
+			//保证data[idx]是data[2*idx]和data[2*idx+1]中的最大值
 			//这样才能保证换上来的元素是最大的
-			if(data[k].compareTo(data[j])>=0)
+			if(data[idx].compareTo(data[j])>=0)
 				break;
-			swap(k,j);
-			k = j;
+			swap(idx,j);
+			idx = j;
 	
 		}
 	}
